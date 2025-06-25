@@ -1,0 +1,39 @@
+name: ZAP Security Scan
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  zap-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start App
+        run: |
+          npm start &
+          sleep 10
+
+      - name: Run OWASP ZAP Scan
+        uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: 'http://localhost:3000'
+          
+          fail_action: false
+
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: zap-report
+          path: zap-report.html
